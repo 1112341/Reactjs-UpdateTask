@@ -1,0 +1,14 @@
+.span{
+    margin: 0px;
+    padding: 0px 10px 0px;
+}
+
+.text-right{
+    margin: 0px;
+    padding: 0px;
+    float: right;
+}
+.mr-5{
+    margin: 0px 5px;
+    padding: 0px;
+}
