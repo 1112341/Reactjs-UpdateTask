@@ -4,8 +4,33 @@ class TaskForm extends Component {
     constructor(props){
         super(props);
         this.state = {
+            id : '',
             name : '',
             status : false
+        }
+    }
+    componentWillMount () {
+        if(this.props.taskEditting){
+            this.setState({
+                id: this.props.taskEditting.id,
+                name: this.props.taskEditting.name,
+                status: this.props.taskEditting.status
+            });
+        }
+    }
+    componentWillReceiveProps(nextPros) {
+        if (nextPros && nextPros.taskEditting){
+            this.setState({
+                id: nextPros.taskEditting.id,
+                name: nextPros.taskEditting.name,
+                status: nextPros.taskEditting.status
+            });
+        } else if (!nextPros.taskEditting){
+            this.setState({
+                id: '',
+                name: '',
+                status: false
+            });
         }
     }
     onCloseForm = () => {
@@ -15,12 +40,13 @@ class TaskForm extends Component {
         var target = event.target;
         var name = target.name;
         var value  = target.value;
-        if(name==='status') {
+        if(name ==='status') {
             value = target.value === 'true' ? true: false;
         }
         this.setState({
             [name] : value 
         });
+        
     }
     onSubmit = (event) =>{
         event.preventDefault();
@@ -33,12 +59,14 @@ class TaskForm extends Component {
                 status:false
         });
     }
+
     render() {
+        var {id} = this.state;
         return (
                  <div className="panel panel-warning">
                                    <div className="panel-heading">
                                          <h4 className="panel-title">
-                                            Thêm Công Việc
+                                            {id === '' ? 'Thêm công việc' : 'Chỉnh sửa công việc'}
                                             <span
                                                 className="fa fa-times-circle text-right"
                                                 onClick = {this.onCloseForm}

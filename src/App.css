@@ -42,3 +42,11 @@
   padding: 10px;
   border: solid 3px red;
 }
+.sort_selected::after{
+   content: '\f00c';
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  margin: 0px 0px 0px 10px;
+  display: inline-block
+}

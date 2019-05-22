@@ -8,7 +8,15 @@ class Project2 extends Component {
         super(props);
         this.state = {
             tasks:[],
-            isDisplayForm:false
+            isDisplayForm:false,
+            taskEditting:null,
+            filter: {
+                name :'',
+                status : -1
+            },
+            keyword: '',
+            sortBy : '',
+            sortValue: 1
         }
     }
     componentWillMount() {
@@ -18,13 +26,24 @@ class Project2 extends Component {
                 tasks: tasks
             })
         }
-        localStorage.setItem('tasks',JSON.stringify(tasks));
+        // localStorage.setItem('tasks',JSON.stringify(tasks));
     }
-    onUpdateStatus = (id) =>{
-        console.log(id);
+    onDelete = (id) => {
         var {tasks} = this.state;
         var index = this.findIndex(tasks,id);
-        if (index != -1) {
+        if (index !== -1) {
+            tasks.splice(index,1);
+            this.setState({
+                tasks: tasks
+            });
+        }
+       localStorage.setItem('tasks',JSON.stringify(tasks));
+       this.onCloseForm();
+    }
+    onUpdateStatus = (id) =>{
+        var {tasks} = this.state;
+        var index = this.findIndex(tasks,id);
+        if (index !== -1) {
             tasks[index].status = !tasks[index].status;
             this.setState({
                 tasks: tasks
@@ -32,8 +51,35 @@ class Project2 extends Component {
         }
        localStorage.setItem('tasks',JSON.stringify(tasks));
     }
-
-    findIndex(tasks,id) {
+    onUpdate = (task) => {
+        console.log(task);
+        var {tasks} = this.state;
+        var index = this.findIndex(tasks,task.id);
+        var taskEditting = tasks[index];
+        this.setState({
+                taskEditting: taskEditting
+            });
+        this.onShowForm();
+    }
+    onFilter = (filterName,filterStatus) => {
+        console.log(filterName +'-'+ filterStatus);
+        filterStatus = parseInt(filterStatus,10);
+        this.setState ({
+            filter : {
+                name : filterName.toLowerCase(),
+                status : filterStatus
+            }
+        });
+    }
+    onSort = (sortBy, sortValue) => {
+        // console.log(sortBy + '--' + sortValue);
+        this.setState({
+            sortBy:sortBy,
+            sortValue:sortValue
+        });
+        console.log(this.state);
+    }
+    findIndex(tasks,id) { 
         var {tasks} = this.state;
         var result = -1;
         tasks.forEach((task,index) => {
@@ -43,30 +89,7 @@ class Project2 extends Component {
         });
        return result;
     }
-    // generateData = () => {
-    //     var tasks = [
-    //         {
-    //             id : this.generateId (),
-    //             name : "Hoc Lap Trinh",
-    //             status: true
-    //         },
-    //         {
-    //             id : this.generateId (),
-    //             name : "Di Choi",
-    //             status: false
-    //         },
-    //         {
-    //             id : this.generateId (),
-    //             name : "Di học",
-    //             status: true
-    //         }
-    //     ];
-    //    // console.log(tasks);
-    //     this.setState({
-    //         task:tasks
-    //     });
-    //     localStorage.setItem('tasks',JSON.stringify(tasks));
-    // }
+
     s4() {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
       // return 1111;
@@ -75,31 +98,95 @@ class Project2 extends Component {
         return this.s4() + this.s4() + '-'+ this.s4();
     }
     onToggleFrom = () =>{
-        this.setState ({
-            isDisplayForm : !this.state.isDisplayForm
-        });
+        if (this.state.isDisplayForm && this.state.taskEditting !== null) {
+            this.setState ({
+                isDisplayForm : true,
+                taskEditting:null
+            });
+        }else {
+            this.setState ({
+                isDisplayForm : !this.state.isDisplayForm,
+                taskEditting:null
+            });
+        }
+        
     }
     onCloseForm = () => {
-        //  isDisplayForm : !this.state.isDisplayForm
-       // console.log('onCloseForm consolelog');
         this.setState ({
-            isDisplayForm : !this.state.isDisplayForm
+            isDisplayForm : false,
+
+        });
+    }
+    onShowForm = () =>{
+        this.setState ({
+            isDisplayForm : true
         });
     }
     onSubmit =(data)=>{
-        data.id = this.generateId();
-        console.log(data);
         var{tasks} = this.state;
-        tasks.push(data);
+        if (data.id === '') {
+            data.id = this.generateId();
+            tasks.push(data);
+        } else {
+            var index = this.findIndex(data,data.id);
+            tasks[index] = data;
+        }
         this.setState({
-            tasks : tasks
+            tasks : tasks,
+            taskEditting : null
         });
-        console.log(this.state.tasks);
+
         localStorage.setItem('tasks',JSON.stringify(tasks));
+        this.onCloseForm();
+    }
+    onSearch = (keyword) =>{
+        console.log(keyword);
+        this.setState({
+            keyword : keyword
+        })
     }
     render() {
-        var { tasks,isDisplayForm  } = this.state;
-        var elmTaskForm = isDisplayForm ? <TaskForm onSubmit={this.onSubmit} onCloseForm = {this.onCloseForm} /> : '';
+        var { tasks,isDisplayForm,taskEditting,filter,keyword, sortBy, sortValue} = this.state;
+        if (filter) {
+            if (filter.name) {
+               tasks = tasks.filter ((task) =>{
+                    return task.name.toLowerCase().indexOf(filter.name) !== -1;
+                });   
+            }
+            tasks = tasks.filter((task) =>{
+                if (filter.status === -1) {
+                    return task;
+                } else {
+                    return task.status === (filter.status === 1 ? true : false);
+                }
+            });
+            if(sortBy === 'name') {
+                tasks.sort((a,b) =>{
+                    if (a.name > b.name) return sortValue;
+                    else if (a.name < b.name) return -sortValue;
+                    else return 0;
+                });
+          
+            }
+            if(sortBy ==='status') {
+                tasks.sort((a,b)=>{
+                    if (a.status > b.status) return sortValue;
+                    else if (a.status < b.status) return -sortValue;
+                    else return 0;
+                })
+            }
+    }
+        
+        if (keyword) {
+                tasks = tasks.filter ((task) =>{
+                     return task.name.toLowerCase().indexOf(keyword) !== -1;
+                 });     
+        }
+        var elmTaskForm = isDisplayForm ? <TaskForm 
+        onSubmit={this.onSubmit} 
+        onCloseForm = {this.onCloseForm} 
+        taskEditting = {taskEditting}
+        /> : '';
         return (
             <div>
                 <div className="container">
@@ -118,9 +205,14 @@ class Project2 extends Component {
                             </button> */}
                             <div className="row">
                             {/* Search */}
-                                <Control/>
+                                <Control onSearch = {this.onSearch}
+                                onSort = {this.onSort}/>
                             </div>
-                            <TaskTable onUpdateStatus = {this.onUpdateStatus} 
+                            <TaskTable 
+                            onUpdate = {this.onUpdate}
+                            onDelete = {this.onDelete}
+                            onUpdateStatus = {this.onUpdateStatus} 
+                            onFilter = {this.onFilter}
                             tasks = {tasks}/> 
                         </div>
                      </div>

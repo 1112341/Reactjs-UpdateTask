@@ -3,11 +3,15 @@ import Search from './Search';
 import Sort from './Sort';
 
 class Control extends Component {
+    onSearch = (keyword)=>{
+        console.log(keyword);
+        this.props.onSearch(keyword);
+    }
     render() {
         return (
             <div>
-                <Search/>
-                <Sort/>
+                <Search onSearch = {this.onSearch}/>
+                <Sort onSort ={this.props.onSort}/>
             </div>
         );
     }

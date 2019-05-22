@@ -1,13 +1,19 @@
 import React, { Component } from 'react';
 
 class TaskItem extends Component {
+
+    onDelete = () => {
+        this.props.onDelete(this.props.task.id);
+    }
+
     onUpdateStatus = () =>{
-        //console.log(this.props.task.id);
         this.props.onUpdateStatus(this.props.task.id);
+    }
+    onUpdate = () =>{
+        this.props.onUpdate(this.props.task);
     }
     render() {
         var {task, index} = this.props;
-        console.log(task);
         return (
             
                 <tr>
@@ -19,13 +25,18 @@ class TaskItem extends Component {
                         className={task.status ? 'label label-danger' : 'label label-success'} >{task.status === true ? 'Kích Hoạt' : 'Ẩn'}</span>
                     </td>
                     <td className="text-center">
-                        <button type="button" className="btn btn-warning">
+                        <button onClick={this.onUpdate}
+                         type="button" 
+                         className="btn btn-warning">
                             <span 
-                            onClick={this.onUpdate}
+                            
                             className="fa fa-pencil mr-5"
                             ></span>Sửa
                         </button>
-                        <button type="button" className="btn btn-danger">
+                        <button 
+                        onClick={this.onDelete}
+                        type="button" 
+                        className="btn btn-danger">
                             <span className="fa fa-trash mr-5"></span>Xóa
                         </button>
                     </td>
